@@ -6,6 +6,10 @@ from django.urls import include
 from django.urls import path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
     path("polls/", include("polls.urls")),
@@ -20,6 +24,8 @@ urlpatterns = [
     # User management
     path("users/", include("django_example.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     # Your stuff: custom urls includes go here
     # ...
     # Media files
