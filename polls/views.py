@@ -1,6 +1,9 @@
 from django.utils import timezone
 from django.views import generic
 
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from .models import Choice, Question
 
 
@@ -75,4 +78,32 @@ class VoteView(generic.View):
     This class is a placeholder for the voting logic, which should be implemented in the future.
     """
 
-    pass
+    def post(self, request, question_id):
+        """
+        Handles the POST request for voting on a specific question.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            question_id (int): The ID of the question being voted on.
+
+        Returns:
+            HttpResponseRedirect: A redirect response to the question's results page.
+        """
+        question = get_object_or_404(Question, pk=question_id)
+        try:
+            selected_choice = question.choice_set.get(pk=request.POST["choice"])
+        except (KeyError, Choice.DoesNotExist):
+            # Redisplay the question voting form.
+            return render(
+                request,
+                "polls/detail.html",
+                {
+                    "question": question,
+                    "error_message": "You didn't select a choice.",
+                },
+            )
+        else:
+            selected_choice.votes += 1
+            selected_choice.save()
+            # Redirect to the question's results page.
+            return HttpResponseRedirect(reverse("polls:results", args=(question.id,)))
